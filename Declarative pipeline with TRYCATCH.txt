@@ -1,0 +1,97 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContDownload')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/IntelliqDevops/maven'
+                    }
+                    catch (Exception e1)
+                    {
+                        mail bcc: '', body: 'Jenkins unbale to download from GIT HUB', cc: '', from: '', replyTo: '', subject: 'Download failed', to: 'git.admin@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+         stage('ContBuild')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'mvn package'
+                    }
+                    catch (Exception e2)
+                    {
+                        mail bcc: '', body: 'Jenkins unbale to create a artifact', cc: '', from: '', replyTo: '', subject: 'Build failed', to: 'Dev@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+        stage('ContDeployment')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'scp /var/lib/jenkins/workspace/TRYCATCH/webapp/target/webapp.war ubuntu@172.31.71.255:/var/lib/tomcat10/webapps/testapp.war'
+                    }
+                    catch (Exception e3)
+                    {
+                        mail bcc: '', body: 'Jenkin is unable to deploy on tomcat on QA server', cc: '', from: '', replyTo: '', subject: 'Deploy failed', to: 'middle.eng@gmail.com'
+                        exit (1)
+                    }
+                }
+            }
+        }
+        stage('ContTesting')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/IntelliqDevops/FunctionalTesting'
+                        sh 'java -jar /var/lib/jenkins/workspace/TRYCATCH/testing.jar'
+                    }
+                    catch (Exception e4)
+                    {
+                        mail bcc: '', body: 'Selenium scripts failing', cc: '', from: '', replyTo: '', subject: 'Testing failed', to: 'QA.eng@gmail.com'
+                        exit (1)
+                    }
+                }
+            }
+        }
+        stage('ContDelivery')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'scp /var/lib/jenkins/workspace/TRYCATCH/webapp/target/webapp.war ubuntu@172.31.64.9:/var/lib/tomcat10/webapps/prodapp.war'
+                    }
+                    catch (Exception e5)
+                    {
+                        mail bcc: '', body: 'Jenkin is unable to deploy on tomcat on prod derver', cc: '', from: '', replyTo: '', subject: 'Delivery failed', to: 'Del.eng@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}

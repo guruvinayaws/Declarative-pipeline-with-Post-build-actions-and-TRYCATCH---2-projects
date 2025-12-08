@@ -1,0 +1,16 @@
+@Library('mylibrary')_
+node('built-in')
+{
+    stage('Download')
+    {
+       cicd.gitDownload("maven") 
+    }
+    stage('Build')
+    {
+       cicd.buildArtifact()   
+    }
+    stage('Deploy')
+    {
+       cicd.deployTomcat("172.31.71.255","testapp") 
+    }
+}

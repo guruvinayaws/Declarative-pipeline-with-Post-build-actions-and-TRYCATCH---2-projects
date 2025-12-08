@@ -1,0 +1,8 @@
+@Library('mylibrary')_
+node('built-in')
+{
+stage('Delivery')
+    {
+        cicd.deployTomcat("172.31.64.9","prodapp")
+    }
+}
